@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from main import run_pipeline
+from video.video_package_generator import generate_video_packages
 
 
 OUTPUT_PATH = Path("outputs") / "daily_report.md"
@@ -82,9 +83,11 @@ def build_report(data: dict[str, Any]) -> str:
 
 
 def generate_daily_report(path: Path = OUTPUT_PATH) -> Path:
-    """Run the pipeline and write the Markdown report."""
+    """Run the pipeline, write the report, and generate video packages."""
+    data = run_pipeline()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(build_report(run_pipeline()), encoding="utf-8")
+    path.write_text(build_report(data), encoding="utf-8")
+    generate_video_packages(data["video_scripts"])
     return path
 
 
