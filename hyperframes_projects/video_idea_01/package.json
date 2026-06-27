@@ -1,0 +1,13 @@
+{
+  "name": "video-idea-01-hyperframes",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "lint": "hyperframes lint",
+    "validate": "hyperframes validate",
+    "inspect": "hyperframes inspect",
+    "preview": "hyperframes preview --port 3017",
+    "render:draft": "hyperframes render --quality draft --output renders/video_idea_01_draft.mp4",
+    "render": "hyperframes render --quality high --output renders/video_idea_01.mp4"
+  }
+}

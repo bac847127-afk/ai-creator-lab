@@ -1,0 +1,12 @@
+{
+  "duration": 60,
+  "maxStaticSec": 5,
+  "assertions": [
+    { "kind": "appearsBy", "selector": "#hook-title", "bySec": 1 },
+    { "kind": "appearsBy", "selector": "#phone-frame", "bySec": 11 },
+    { "kind": "appearsBy", "selector": "#result-panel", "bySec": 26 },
+    { "kind": "appearsBy", "selector": "#workflow-panel", "bySec": 47 },
+    { "kind": "staysInFrame", "selector": ".headline" },
+    { "kind": "staysInFrame", "selector": ".bottom-caption" }
+  ]
+}

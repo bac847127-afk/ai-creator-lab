@@ -1,0 +1,554 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <title>AI自动生成视频 - HyperFrames Composition</title>
+<style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: #050816;
+        color: #f8fbff;
+        font-family: Inter, system-ui, sans-serif;
+      }
+
+      #root {
+        position: relative;
+        width: 1080px;
+        height: 1920px;
+        overflow: hidden;
+        background: #050816;
+      }
+
+      .clip {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      .background-layer {
+        background:
+          radial-gradient(circle at 24% 18%, rgba(34, 211, 238, 0.38), transparent 26%),
+          radial-gradient(circle at 76% 30%, rgba(124, 58, 237, 0.36), transparent 28%),
+          radial-gradient(circle at 58% 80%, rgba(16, 185, 129, 0.25), transparent 32%),
+          linear-gradient(160deg, #050816 0%, #08111f 42%, #150b2e 100%);
+      }
+
+      .grid {
+        position: absolute;
+        inset: -120px;
+        opacity: 0.38;
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
+        background-size: 72px 72px;
+        transform: perspective(900px) rotateX(58deg) translateY(360px);
+        transform-origin: 50% 100%;
+      }
+
+      .light-sweep {
+        position: absolute;
+        width: 260px;
+        height: 2200px;
+        left: -260px;
+        top: -120px;
+        opacity: 0.42;
+        transform: rotate(18deg);
+        background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.86), transparent);
+        filter: blur(18px);
+      }
+
+      .particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: #67e8f9;
+        box-shadow: 0 0 28px rgba(103, 232, 249, 0.92);
+        opacity: 0.7;
+      }
+
+      .particle.p1 {
+        left: 150px;
+        top: 270px;
+      }
+
+      .particle.p2 {
+        right: 180px;
+        top: 560px;
+        background: #a78bfa;
+      }
+
+      .particle.p3 {
+        left: 220px;
+        bottom: 430px;
+        background: #34d399;
+      }
+
+      .scene-inner {
+        position: absolute;
+        inset: 0;
+        padding: 118px 72px 128px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 42px;
+      }
+
+      .eyebrow {
+        align-self: flex-start;
+        padding: 14px 22px;
+        border: 1px solid rgba(125, 211, 252, 0.5);
+        border-radius: 999px;
+        color: #a5f3fc;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: 0;
+        background: rgba(8, 47, 73, 0.42);
+        backdrop-filter: blur(10px);
+      }
+
+      .headline {
+        margin: 0;
+        max-width: 920px;
+        font-size: 92px;
+        line-height: 1.06;
+        font-weight: 950;
+        letter-spacing: 0;
+      }
+
+      .headline .highlight,
+      .caption .highlight,
+      .step-card strong {
+        color: #facc15;
+        text-shadow: 0 0 34px rgba(250, 204, 21, 0.68);
+      }
+
+      .caption {
+        max-width: 940px;
+        margin: 0;
+        padding: 28px 34px;
+        border-left: 8px solid #22d3ee;
+        border-radius: 28px;
+        color: #e5f7ff;
+        font-size: 43px;
+        line-height: 1.28;
+        font-weight: 850;
+        background: rgba(15, 23, 42, 0.72);
+        box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
+      }
+
+      .phone-frame,
+      .result-panel,
+      .workflow-panel {
+        border: 1px solid rgba(148, 163, 184, 0.32);
+        border-radius: 38px;
+        background: rgba(15, 23, 42, 0.78);
+        box-shadow:
+          0 36px 110px rgba(0, 0, 0, 0.42),
+          inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(18px);
+      }
+
+      .phone-frame {
+        width: 720px;
+        min-height: 520px;
+        padding: 34px;
+      }
+
+      .input-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px;
+        border-radius: 24px;
+        color: #c4e7ff;
+        font-size: 28px;
+        background: rgba(2, 6, 23, 0.72);
+      }
+
+      .cursor-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #22d3ee;
+        box-shadow: 0 0 24px rgba(34, 211, 238, 0.9);
+      }
+
+      .process-list {
+        display: grid;
+        gap: 22px;
+        margin-top: 34px;
+      }
+
+      .process-item {
+        padding: 24px 26px;
+        border-radius: 24px;
+        font-size: 34px;
+        font-weight: 850;
+        color: #f8fafc;
+        background: linear-gradient(90deg, rgba(14, 165, 233, 0.22), rgba(124, 58, 237, 0.16));
+      }
+
+      .result-panel {
+        width: 890px;
+        min-height: 560px;
+        padding: 38px;
+      }
+
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+      }
+
+      .compare-card {
+        min-height: 360px;
+        padding: 28px;
+        border-radius: 30px;
+        background: rgba(2, 6, 23, 0.62);
+      }
+
+      .compare-card h3 {
+        margin: 0 0 22px;
+        font-size: 38px;
+      }
+
+      .compare-card p {
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 30px;
+        line-height: 1.35;
+      }
+
+      .metric {
+        margin-top: 28px;
+        font-size: 72px;
+        line-height: 1;
+        font-weight: 950;
+        color: #34d399;
+      }
+
+      .workflow-panel {
+        width: 900px;
+        padding: 42px;
+      }
+
+      .steps {
+        display: grid;
+        gap: 22px;
+      }
+
+      .step-card {
+        display: grid;
+        grid-template-columns: 84px 1fr;
+        align-items: center;
+        gap: 22px;
+        padding: 26px;
+        border-radius: 28px;
+        background: rgba(8, 47, 73, 0.55);
+      }
+
+      .step-number {
+        display: grid;
+        place-items: center;
+        width: 84px;
+        height: 84px;
+        border-radius: 28px;
+        color: #031018;
+        font-size: 42px;
+        font-weight: 950;
+        background: #67e8f9;
+      }
+
+      .step-card p {
+        margin: 0;
+        font-size: 38px;
+        font-weight: 880;
+        line-height: 1.22;
+      }
+
+      .bottom-caption {
+        position: absolute;
+        inset: auto 72px 96px 72px;
+        opacity: 0;
+        min-height: 112px;
+        padding: 24px 32px;
+        border-radius: 30px;
+        display: grid;
+        place-items: center;
+        color: #ffffff;
+        font-size: 48px;
+        line-height: 1.18;
+        font-weight: 950;
+        text-align: center;
+        background: rgba(2, 6, 23, 0.78);
+        border: 1px solid rgba(125, 211, 252, 0.38);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.44);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="video_idea_01" data-start="0" data-width="1080" data-height="1920" data-duration="60" data-fps="30">
+      <section id="bg" class="clip background-layer" data-start="0" data-duration="60" data-track-index="0">
+        <div id="grid" class="grid" data-layout-ignore="true"></div>
+        <div id="light-sweep" class="light-sweep" data-layout-ignore="true"></div>
+        <div id="particle-1" class="particle p1" data-layout-ignore="true"></div>
+        <div id="particle-2" class="particle p2" data-layout-ignore="true"></div>
+        <div id="particle-3" class="particle p3" data-layout-ignore="true"></div>
+      </section>
+
+      <section id="scene-hook" class="clip" data-start="0" data-duration="3" data-track-index="1">
+        <div class="scene-inner">
+          <div id="hook-eyebrow" class="eyebrow">前3秒强钩子</div>
+          <h1 id="hook-title" class="headline">
+            我把 <span class="highlight">AI自动生成视频</span><br />真的跑了一遍
+          </h1>
+          <p id="hook-caption" class="caption">结果不像工具，更像一条内容生产线。</p>
+        </div>
+      </section>
+
+      <section id="scene-problem" class="clip" data-start="3" data-duration="7" data-track-index="1">
+        <div class="scene-inner">
+          <div class="eyebrow">问题展示</div>
+          <h2 id="problem-title" class="headline">传统视频制作<br />慢、贵、步骤多</h2>
+          <p id="problem-caption" class="caption">脚本、画面、字幕、剪辑，每一步都在消耗创作者时间。</p>
+        </div>
+      </section>
+
+      <section id="scene-operation" class="clip" data-start="10" data-duration="15" data-track-index="1">
+        <div class="scene-inner">
+          <div class="eyebrow">AI操作演示</div>
+          <div id="phone-frame" class="phone-frame">
+            <div class="input-bar">
+              <span class="cursor-dot"></span>
+              输入需求：AI自动生成视频
+            </div>
+            <div class="process-list">
+              <div id="process-1" class="process-item">01 读取趋势</div>
+              <div id="process-2" class="process-item">02 拆解结构</div>
+              <div id="process-3" class="process-item">03 生成脚本</div>
+              <div id="process-4" class="process-item">04 输出视频包</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-result" class="clip" data-start="25" data-duration="20" data-track-index="1">
+        <div class="scene-inner">
+          <div class="eyebrow">结果对比</div>
+          <div id="result-panel" class="result-panel">
+            <div class="compare-grid">
+              <div id="old-flow" class="compare-card">
+                <h3>旧流程</h3>
+                <p>先找选题，再写脚本，再剪素材，再做字幕。</p>
+                <div class="metric">4步+</div>
+              </div>
+              <div id="ai-flow" class="compare-card">
+                <h3>AI流程</h3>
+                <p>输入趋势，自动结构化，直接生成可拍脚本。</p>
+                <div class="metric">1条线</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="scene-close" class="clip" data-start="45" data-duration="15" data-track-index="1">
+        <div class="scene-inner">
+          <div class="eyebrow">结尾引导</div>
+          <h2 id="close-title" class="headline">你今天就能<br />复制这套方法</h2>
+          <div id="workflow-panel" class="workflow-panel">
+            <div class="steps">
+              <div class="step-card">
+                <div class="step-number">1</div>
+                <p>先给 <strong>趋势</strong></p>
+              </div>
+              <div class="step-card">
+                <div class="step-number">2</div>
+                <p>让 AI 拆 <strong>结构</strong></p>
+              </div>
+              <div class="step-card">
+                <div class="step-number">3</div>
+                <p>生成 <strong>可拍脚本</strong></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="caption-1" class="clip bottom-caption" data-start="0" data-duration="3" data-track-index="2">
+        AI自动生成视频
+      </div>
+      <div id="caption-2" class="clip bottom-caption" data-start="3" data-duration="7" data-track-index="2">
+        传统制作太慢
+      </div>
+      <div id="caption-3" class="clip bottom-caption" data-start="10" data-duration="15" data-track-index="2">
+        输入需求，AI开跑
+      </div>
+      <div id="caption-4" class="clip bottom-caption" data-start="25" data-duration="20" data-track-index="2">
+        复杂制作变可见结果
+      </div>
+      <div id="caption-5" class="clip bottom-caption" data-start="45" data-duration="15" data-track-index="2">
+        给趋势，拆结构，出脚本
+      </div>
+    </div>
+
+    <script>
+      function createMiniTimeline() {
+        const tweens = [];
+        const numericProps = new Set(["opacity", "x", "y", "scale"]);
+
+        function elements(selector) {
+          if (typeof selector !== "string") return [];
+          return Array.from(document.querySelectorAll(selector));
+        }
+
+        function pickVars(vars) {
+          const picked = {};
+          Object.keys(vars || {}).forEach((key) => {
+            if (numericProps.has(key)) picked[key] = Number(vars[key]);
+          });
+          return picked;
+        }
+
+        function defaultsFor(vars) {
+          const defaults = {};
+          Object.keys(vars || {}).forEach((key) => {
+            if (key === "opacity") defaults.opacity = 1;
+            if (key === "x") defaults.x = 0;
+            if (key === "y") defaults.y = 0;
+            if (key === "scale") defaults.scale = 1;
+          });
+          return defaults;
+        }
+
+        function applyVars(el, vars) {
+          const x = vars.x ?? 0;
+          const y = vars.y ?? 0;
+          const scale = vars.scale ?? 1;
+          if (vars.opacity !== undefined) el.style.opacity = String(vars.opacity);
+          if (vars.x !== undefined || vars.y !== undefined || vars.scale !== undefined) {
+            el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+          }
+        }
+
+        function interpolate(from, to, progress) {
+          const out = {};
+          const keys = new Set([...Object.keys(from), ...Object.keys(to)]);
+          keys.forEach((key) => {
+            const a = from[key] ?? (key === "opacity" || key === "scale" ? 1 : 0);
+            const b = to[key] ?? (key === "opacity" || key === "scale" ? 1 : 0);
+            out[key] = a + (b - a) * progress;
+          });
+          return out;
+        }
+
+        const api = {
+          from(selector, vars, at = 0) {
+            const fromVars = pickVars(vars);
+            tweens.push({ selector, start: Number(at), duration: Number(vars.duration || 0), fromVars, toVars: defaultsFor(fromVars) });
+            return api;
+          },
+          to(selector, vars, at = 0) {
+            const toVars = pickVars(vars);
+            tweens.push({ selector, start: Number(at), duration: Number(vars.duration || 0), fromVars: defaultsFor(toVars), toVars });
+            return api;
+          },
+          fromTo(selector, fromVars, toVars, at = 0) {
+            tweens.push({ selector, start: Number(at), duration: Number(toVars.duration || 0), fromVars: pickVars(fromVars), toVars: pickVars(toVars) });
+            return api;
+          },
+          set(selector, vars) {
+            elements(selector).forEach((el) => applyVars(el, pickVars(vars)));
+            return api;
+          },
+          seek(sec = 0) {
+            const time = Number(sec) || 0;
+            tweens.forEach((tween) => {
+              const duration = Math.max(tween.duration, 0.001);
+              const progress = Math.min(1, Math.max(0, (time - tween.start) / duration));
+              const vars = interpolate(tween.fromVars, tween.toVars, progress);
+              elements(tween.selector).forEach((el) => applyVars(el, vars));
+            });
+            return api;
+          },
+          time(sec) {
+            if (sec === undefined) return 0;
+            return api.seek(sec);
+          },
+          pause() {
+            return api;
+          },
+          duration() {
+            return 60;
+          },
+          progress(value) {
+            if (value === undefined) return 0;
+            return api.seek(Number(value) * 60);
+          },
+        };
+
+        return api;
+      }
+
+      window.gsap = {
+        timeline() {
+          return createMiniTimeline();
+        },
+      };
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+
+      tl.from("#hook-eyebrow", { y: -28, opacity: 0, duration: 0.35, ease: "power3.out" }, 0.1)
+        .from("#hook-title", { scale: 0.86, opacity: 0, duration: 0.55, ease: "back.out(1.7)" }, 0.18)
+        .from("#hook-caption", { x: -40, opacity: 0, duration: 0.45, ease: "power3.out" }, 0.65)
+        .fromTo("#caption-1", { y: 68, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2)" }, 0.2)
+        .to("#caption-1", { scale: 1.05, duration: 0.12, yoyo: true, repeat: 3, ease: "power1.inOut" }, 1.1);
+
+      tl.from("#problem-title", { x: -90, opacity: 0, duration: 0.46, ease: "power3.out" }, 3.2)
+        .from("#problem-caption", { y: 36, opacity: 0, duration: 0.42, ease: "power2.out" }, 3.78)
+        .fromTo("#caption-2", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 3.12)
+        .to("#problem-title", { x: 10, duration: 0.08, yoyo: true, repeat: 5, ease: "power1.inOut" }, 4.2);
+
+      tl.from("#phone-frame", { y: 120, opacity: 0, scale: 0.92, duration: 0.5, ease: "power3.out" }, 10.15)
+        .from("#process-1", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 11.0)
+        .from("#process-2", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 13.0)
+        .from("#process-3", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 15.0)
+        .from("#process-4", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 17.0)
+        .fromTo("#caption-3", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 10.1)
+        .to("#process-4", { scale: 1.05, duration: 0.18, yoyo: true, repeat: 2, ease: "power1.inOut" }, 19.5);
+
+      tl.from("#result-panel", { scale: 0.9, opacity: 0, duration: 0.48, ease: "power3.out" }, 25.15)
+        .from("#old-flow", { x: -70, opacity: 0, duration: 0.34, ease: "power2.out" }, 26.0)
+        .from("#ai-flow", { x: 70, opacity: 0, duration: 0.34, ease: "power2.out" }, 27.0)
+        .fromTo("#caption-4", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 25.1)
+        .to("#ai-flow", { y: -12, scale: 1.03, duration: 0.36, yoyo: true, repeat: 2, ease: "power1.inOut" }, 31.0);
+
+      tl.from("#close-title", { y: 70, opacity: 0, duration: 0.48, ease: "power3.out" }, 45.15)
+        .from("#workflow-panel", { y: 90, opacity: 0, duration: 0.5, ease: "power3.out" }, 46.2)
+        .from(".step-card", { x: -52, opacity: 0, duration: 0.28, stagger: 0.25, ease: "power2.out" }, 47.0)
+        .fromTo("#caption-5", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 45.1)
+        .to(".step-number", { scale: 1.08, duration: 0.16, stagger: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }, 51.0);
+
+      tl.to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 0.2)
+        .to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 12)
+        .to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 27)
+        .to("#grid", { y: 80, duration: 60, ease: "none" }, 0)
+        .to("#particle-1", { y: -70, x: 42, duration: 18, ease: "sine.inOut" }, 0)
+        .to("#particle-2", { y: 80, x: -38, duration: 22, ease: "sine.inOut" }, 0)
+        .to("#particle-3", { y: -92, x: 60, duration: 20, ease: "sine.inOut" }, 0);
+
+      window.__timelines["video_idea_01"] = tl;
+    </script>
+  </body>
+</html>
+
+
+
+
+
