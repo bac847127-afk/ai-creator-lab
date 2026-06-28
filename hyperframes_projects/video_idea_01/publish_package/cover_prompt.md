@@ -49,3 +49,30 @@
 - 图形元素：MP4 文件图标、视频时间线、发光箭头、AI 节点。
 - 适合工具：Figma 精修文字，AI 生图生成背景，Canva 快速套版。
 - AI生图提示词：16:9 横屏视频封面，极简高冲击科技感，黑色背景，巨大白色中文标题区域，右侧发光 MP4 文件图标和视频时间线，青色粒子网格，黄色关键词强调，清晰大字，高对比，适合抖音横屏、B站、YouTube 封面，不要杂乱元素。
+
+## 最终选定封面方案
+
+- 选定方案：方案 5：强钩子首屏封面。
+- 选择原因：这条视频的核心钩子是不用剪辑和 AI 自动生成视频，适合用极简大字和右侧工作流元素增强点击理解。
+- 封面主标题：不用剪辑 / AI自动生成视频
+- 封面副标题：趋势 → 脚本 → 视频工程 → MP4
+- 视觉方向：科技蓝和青色渐变背景，深色网格，大字高对比，右侧 AI 工作流节点。
+- HTML 源文件：`cover/cover.html`
+- PNG 输出路径：`cover/cover_v1.png`
+- 导出脚本：`cover/export_cover.ps1`
+
+使用方式：
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\cover\export_cover.ps1
+```
+
+## Day15 Fix - Official Cover V2
+
+- cover_v1.png is deprecated because Chinese text rendered as mojibake, question marks, or replacement glyphs in some environments.
+- cover_v2.png is the official fixed cover.
+- Source file: cover/cover.html
+- Exported PNG: cover/cover_v2.png
+- Export script: cover/export_cover.ps1
+- Encoding fix: cover.html uses meta charset UTF-8 and HTML numeric entities for visible Chinese text.
+- Visual check: cover_v2.png was opened and inspected; Chinese title, subtitle, and bottom tags render correctly with no question marks, replacement glyphs, or visible HTML tag remnants.

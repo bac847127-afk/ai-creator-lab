@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>video_idea_01 cover v2</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      background: #030812;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "SimHei", sans-serif;
+    }
+    .cover {
+      position: relative;
+      width: 1920px;
+      height: 1080px;
+      overflow: hidden;
+      color: #ffffff;
+      background:
+        radial-gradient(circle at 76% 18%, rgba(0, 210, 255, 0.34), transparent 31%),
+        radial-gradient(circle at 86% 78%, rgba(255, 210, 66, 0.16), transparent 26%),
+        linear-gradient(135deg, #04111f 0%, #061b30 48%, #020711 100%);
+    }
+    .grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(105, 232, 255, 0.13) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(105, 232, 255, 0.13) 1px, transparent 1px);
+      background-size: 60px 60px;
+      opacity: 0.78;
+    }
+    .shade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(0,0,0,0.38), rgba(0,0,0,0.08) 48%, rgba(0,0,0,0.28));
+    }
+    .beam {
+      position: absolute;
+      right: -120px;
+      top: 230px;
+      width: 1060px;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #37e4ff, #ffd447, transparent);
+      transform: rotate(-13deg);
+      box-shadow: 0 0 34px rgba(55, 228, 255, 0.72);
+      opacity: 0.76;
+    }
+    .beam.second {
+      top: 792px;
+      right: 110px;
+      width: 780px;
+      transform: rotate(12deg);
+      opacity: 0.46;
+    }
+    .particle {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #66eaff;
+      box-shadow: 0 0 22px rgba(102, 234, 255, 0.95);
+    }
+    .p1 { left: 124px; top: 132px; }
+    .p2 { left: 534px; top: 858px; width: 6px; height: 6px; }
+    .p3 { left: 1490px; top: 118px; }
+    .p4 { left: 1768px; top: 824px; width: 11px; height: 11px; background: #ffd447; }
+    .left {
+      position: absolute;
+      left: 110px;
+      top: 118px;
+      width: 880px;
+      z-index: 5;
+    }
+    .label {
+      display: inline-block;
+      padding: 14px 20px;
+      color: #8df2ff;
+      border: 1px solid rgba(141, 242, 255, 0.48);
+      background: rgba(3, 20, 38, 0.76);
+      font-size: 29px;
+      font-weight: 900;
+      letter-spacing: 0;
+      box-shadow: 0 0 34px rgba(55, 228, 255, 0.2);
+    }
+    h1 {
+      margin: 50px 0 0;
+      font-size: 150px;
+      line-height: 1.02;
+      letter-spacing: 0;
+      font-weight: 950;
+      color: #ffffff;
+      text-shadow: 0 10px 28px rgba(0, 0, 0, 0.72), 0 0 52px rgba(55, 228, 255, 0.24);
+    }
+    .title-line {
+      display: block;
+      white-space: nowrap;
+    }
+    .title-line.yellow {
+      margin-top: 20px;
+      color: #ffd447;
+      text-shadow: 0 12px 30px rgba(0, 0, 0, 0.78), 0 0 46px rgba(255, 212, 71, 0.36);
+    }
+    .subtitle {
+      margin-top: 44px;
+      width: 870px;
+      padding: 24px 30px;
+      border-left: 10px solid #60e8ff;
+      background: rgba(2, 16, 30, 0.82);
+      color: #eefcff;
+      font-size: 43px;
+      line-height: 1.25;
+      font-weight: 900;
+      box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42);
+    }
+    .tags {
+      position: absolute;
+      left: 110px;
+      bottom: 62px;
+      display: flex;
+      gap: 20px;
+      z-index: 5;
+    }
+    .tags span {
+      display: inline-flex;
+      align-items: center;
+      height: 58px;
+      padding: 0 22px;
+      color: #eaffff;
+      background: rgba(3, 20, 38, 0.78);
+      border: 1px solid rgba(105, 232, 255, 0.34);
+      border-radius: 999px;
+      font-size: 27px;
+      font-weight: 850;
+      box-shadow: 0 0 22px rgba(105, 232, 255, 0.14);
+    }
+    .right {
+      position: absolute;
+      right: 104px;
+      top: 105px;
+      width: 720px;
+      height: 860px;
+      z-index: 4;
+    }
+    .panel {
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(105, 232, 255, 0.42);
+      border-radius: 28px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(5, 26, 47, 0.92), rgba(3, 13, 28, 0.86));
+      box-shadow: 0 34px 86px rgba(0, 0, 0, 0.5), 0 0 72px rgba(55, 228, 255, 0.18);
+    }
+    .panel-head {
+      height: 86px;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      border-bottom: 1px solid rgba(105, 232, 255, 0.28);
+      color: #89f0ff;
+      font-size: 27px;
+      font-weight: 950;
+    }
+    .dots {
+      display: flex;
+      gap: 12px;
+      margin-right: 20px;
+    }
+    .dots i {
+      display: block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #ffd447;
+    }
+    .dots i:nth-child(2) { background: #60e8ff; }
+    .dots i:nth-child(3) { background: #55ff9c; }
+    .node-wrap {
+      position: absolute;
+      left: 54px;
+      right: 54px;
+      top: 132px;
+      bottom: 70px;
+    }
+    .rail {
+      position: absolute;
+      left: 78px;
+      top: 92px;
+      width: 4px;
+      height: 530px;
+      background: linear-gradient(#60e8ff, #ffd447, #60e8ff);
+      box-shadow: 0 0 22px rgba(96, 232, 255, 0.72);
+      opacity: 0.6;
+    }
+    .node {
+      position: relative;
+      height: 105px;
+      margin-bottom: 28px;
+      padding: 22px 24px 20px 94px;
+      border: 1px solid rgba(105, 232, 255, 0.34);
+      border-radius: 20px;
+      background: rgba(0, 22, 42, 0.84);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.30), 0 0 22px rgba(105,232,255,0.10) inset;
+    }
+    .num {
+      position: absolute;
+      left: 24px;
+      top: 24px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      color: #03101c;
+      background: linear-gradient(135deg, #60e8ff, #ffd447);
+      font-size: 24px;
+      font-weight: 950;
+    }
+    .node strong {
+      display: block;
+      color: #ffffff;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 950;
+      letter-spacing: 0;
+    }
+    .node small {
+      display: block;
+      margin-top: 10px;
+      color: rgba(214, 247, 255, 0.76);
+      font-size: 21px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+    .badge {
+      position: absolute;
+      right: 48px;
+      bottom: 34px;
+      padding: 14px 22px;
+      color: #03101c;
+      background: #ffd447;
+      border-radius: 16px;
+      font-size: 30px;
+      font-weight: 950;
+      box-shadow: 0 0 34px rgba(255, 212, 71, 0.42);
+    }
+  </style>
+</head>
+<body>
+  <main class="cover" aria-label="AI video cover v2">
+    <div class="grid"></div>
+    <div class="shade"></div>
+    <div class="beam"></div>
+    <div class="beam second"></div>
+    <div class="particle p1"></div>
+    <div class="particle p2"></div>
+    <div class="particle p3"></div>
+    <div class="particle p4"></div>
+
+    <section class="left">
+      <div class="label">AI WORKFLOW TEMPLATE</div>
+      <h1>
+        <span class="title-line">&#19981;&#29992;&#21098;&#36753;</span>
+        <span class="title-line yellow">AI&#33258;&#21160;&#29983;&#25104;&#35270;&#39057;</span>
+      </h1>
+      <div class="subtitle">&#36235;&#21183; -> &#33050;&#26412; -> &#35270;&#39057;&#24037;&#31243; -> MP4</div>
+    </section>
+
+    <section class="right" aria-label="AI Creator Pipeline">
+      <div class="panel">
+        <div class="panel-head"><div class="dots"><i></i><i></i><i></i></div>AI Creator Pipeline</div>
+        <div class="node-wrap">
+          <div class="rail"></div>
+          <div class="node"><span class="num">01</span><strong>Trend Input</strong><small>Human topic stream</small></div>
+          <div class="node"><span class="num">02</span><strong>Structure Agent</strong><small>Hook, flow, pacing</small></div>
+          <div class="node"><span class="num">03</span><strong>Script Package</strong><small>Shoot-ready script</small></div>
+          <div class="node"><span class="num">04</span><strong>HyperFrames</strong><small>Video template render</small></div>
+          <div class="node"><span class="num">05</span><strong>Final MP4</strong><small>Publish-ready output</small></div>
+        </div>
+        <div class="badge">FINAL MP4</div>
+      </div>
+    </section>
+
+    <footer class="tags">
+      <span>AI&#24037;&#20316;&#27969;</span>
+      <span>60&#31186;&#28436;&#31034;</span>
+      <span>Codex + HyperFrames</span>
+    </footer>
+  </main>
+</body>
+</html>
