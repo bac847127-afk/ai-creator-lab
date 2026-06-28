@@ -1,554 +1,161 @@
-﻿<!doctype html>
+﻿
+<!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=1080, height=1920" />
-    <title>AI自动生成视频 - HyperFrames Composition</title>
-<style>
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        background: #050816;
-        color: #f8fbff;
-        font-family: Inter, system-ui, sans-serif;
-      }
-
-      #root {
-        position: relative;
-        width: 1080px;
-        height: 1920px;
-        overflow: hidden;
-        background: #050816;
-      }
-
-      .clip {
-        position: absolute;
-        inset: 0;
-        overflow: hidden;
-      }
-
-      .background-layer {
-        background:
-          radial-gradient(circle at 24% 18%, rgba(34, 211, 238, 0.38), transparent 26%),
-          radial-gradient(circle at 76% 30%, rgba(124, 58, 237, 0.36), transparent 28%),
-          radial-gradient(circle at 58% 80%, rgba(16, 185, 129, 0.25), transparent 32%),
-          linear-gradient(160deg, #050816 0%, #08111f 42%, #150b2e 100%);
-      }
-
-      .grid {
-        position: absolute;
-        inset: -120px;
-        opacity: 0.38;
-        background-image:
-          linear-gradient(rgba(148, 163, 184, 0.16) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(148, 163, 184, 0.16) 1px, transparent 1px);
-        background-size: 72px 72px;
-        transform: perspective(900px) rotateX(58deg) translateY(360px);
-        transform-origin: 50% 100%;
-      }
-
-      .light-sweep {
-        position: absolute;
-        width: 260px;
-        height: 2200px;
-        left: -260px;
-        top: -120px;
-        opacity: 0.42;
-        transform: rotate(18deg);
-        background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.86), transparent);
-        filter: blur(18px);
-      }
-
-      .particle {
-        position: absolute;
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
-        background: #67e8f9;
-        box-shadow: 0 0 28px rgba(103, 232, 249, 0.92);
-        opacity: 0.7;
-      }
-
-      .particle.p1 {
-        left: 150px;
-        top: 270px;
-      }
-
-      .particle.p2 {
-        right: 180px;
-        top: 560px;
-        background: #a78bfa;
-      }
-
-      .particle.p3 {
-        left: 220px;
-        bottom: 430px;
-        background: #34d399;
-      }
-
-      .scene-inner {
-        position: absolute;
-        inset: 0;
-        padding: 118px 72px 128px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        gap: 42px;
-      }
-
-      .eyebrow {
-        align-self: flex-start;
-        padding: 14px 22px;
-        border: 1px solid rgba(125, 211, 252, 0.5);
-        border-radius: 999px;
-        color: #a5f3fc;
-        font-size: 30px;
-        font-weight: 800;
-        letter-spacing: 0;
-        background: rgba(8, 47, 73, 0.42);
-        backdrop-filter: blur(10px);
-      }
-
-      .headline {
-        margin: 0;
-        max-width: 920px;
-        font-size: 92px;
-        line-height: 1.06;
-        font-weight: 950;
-        letter-spacing: 0;
-      }
-
-      .headline .highlight,
-      .caption .highlight,
-      .step-card strong {
-        color: #facc15;
-        text-shadow: 0 0 34px rgba(250, 204, 21, 0.68);
-      }
-
-      .caption {
-        max-width: 940px;
-        margin: 0;
-        padding: 28px 34px;
-        border-left: 8px solid #22d3ee;
-        border-radius: 28px;
-        color: #e5f7ff;
-        font-size: 43px;
-        line-height: 1.28;
-        font-weight: 850;
-        background: rgba(15, 23, 42, 0.72);
-        box-shadow: 0 24px 90px rgba(0, 0, 0, 0.35);
-      }
-
-      .phone-frame,
-      .result-panel,
-      .workflow-panel {
-        border: 1px solid rgba(148, 163, 184, 0.32);
-        border-radius: 38px;
-        background: rgba(15, 23, 42, 0.78);
-        box-shadow:
-          0 36px 110px rgba(0, 0, 0, 0.42),
-          inset 0 0 0 1px rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(18px);
-      }
-
-      .phone-frame {
-        width: 720px;
-        min-height: 520px;
-        padding: 34px;
-      }
-
-      .input-bar {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 22px;
-        border-radius: 24px;
-        color: #c4e7ff;
-        font-size: 28px;
-        background: rgba(2, 6, 23, 0.72);
-      }
-
-      .cursor-dot {
-        width: 18px;
-        height: 18px;
-        border-radius: 999px;
-        background: #22d3ee;
-        box-shadow: 0 0 24px rgba(34, 211, 238, 0.9);
-      }
-
-      .process-list {
-        display: grid;
-        gap: 22px;
-        margin-top: 34px;
-      }
-
-      .process-item {
-        padding: 24px 26px;
-        border-radius: 24px;
-        font-size: 34px;
-        font-weight: 850;
-        color: #f8fafc;
-        background: linear-gradient(90deg, rgba(14, 165, 233, 0.22), rgba(124, 58, 237, 0.16));
-      }
-
-      .result-panel {
-        width: 890px;
-        min-height: 560px;
-        padding: 38px;
-      }
-
-      .compare-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 22px;
-      }
-
-      .compare-card {
-        min-height: 360px;
-        padding: 28px;
-        border-radius: 30px;
-        background: rgba(2, 6, 23, 0.62);
-      }
-
-      .compare-card h3 {
-        margin: 0 0 22px;
-        font-size: 38px;
-      }
-
-      .compare-card p {
-        margin: 0;
-        color: #cbd5e1;
-        font-size: 30px;
-        line-height: 1.35;
-      }
-
-      .metric {
-        margin-top: 28px;
-        font-size: 72px;
-        line-height: 1;
-        font-weight: 950;
-        color: #34d399;
-      }
-
-      .workflow-panel {
-        width: 900px;
-        padding: 42px;
-      }
-
-      .steps {
-        display: grid;
-        gap: 22px;
-      }
-
-      .step-card {
-        display: grid;
-        grid-template-columns: 84px 1fr;
-        align-items: center;
-        gap: 22px;
-        padding: 26px;
-        border-radius: 28px;
-        background: rgba(8, 47, 73, 0.55);
-      }
-
-      .step-number {
-        display: grid;
-        place-items: center;
-        width: 84px;
-        height: 84px;
-        border-radius: 28px;
-        color: #031018;
-        font-size: 42px;
-        font-weight: 950;
-        background: #67e8f9;
-      }
-
-      .step-card p {
-        margin: 0;
-        font-size: 38px;
-        font-weight: 880;
-        line-height: 1.22;
-      }
-
-      .bottom-caption {
-        position: absolute;
-        inset: auto 72px 96px 72px;
-        opacity: 0;
-        min-height: 112px;
-        padding: 24px 32px;
-        border-radius: 30px;
-        display: grid;
-        place-items: center;
-        color: #ffffff;
-        font-size: 48px;
-        line-height: 1.18;
-        font-weight: 950;
-        text-align: center;
-        background: rgba(2, 6, 23, 0.78);
-        border: 1px solid rgba(125, 211, 252, 0.38);
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.44);
-      }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>AI Creator Workflow Publish V1</title>
+    <style>
+      * { box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; margin: 0; background: #020617; color: #fff; font-family: Inter, system-ui, sans-serif; }
+      #root { position: relative; width: 1920px; height: 1080px; overflow: hidden; background: #020617; }
+      .clip { position: absolute; inset: 0; overflow: hidden; }
+      .background-layer { background: radial-gradient(circle at 18% 12%, rgba(34,211,238,.24), transparent 25%), radial-gradient(circle at 78% 18%, rgba(99,102,241,.24), transparent 29%), radial-gradient(circle at 60% 86%, rgba(16,185,129,.15), transparent 32%), linear-gradient(135deg, #020617 0%, #07111f 48%, #050816 100%); }
+      .bg-dim { position: absolute; inset: 0; background: rgba(0,0,0,.34); }
+      .grid { position: absolute; inset: -180px; opacity: .18; background-image: linear-gradient(rgba(148,163,184,.18) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.18) 1px, transparent 1px); background-size: 96px 96px; transform: perspective(1200px) rotateX(58deg) translateY(260px); transform-origin: 50% 100%; }
+      .light-sweep { position: absolute; width: 360px; height: 1480px; left: -460px; top: -190px; opacity: .30; transform: rotate(20deg); background: linear-gradient(90deg, transparent, rgba(125,211,252,.78), transparent); filter: blur(24px); }
+      .particle { position: absolute; width: 8px; height: 8px; border-radius: 999px; background: #67e8f9; box-shadow: 0 0 28px rgba(103,232,249,.85); opacity: .62; }
+      .p1 { left: 220px; top: 168px; } .p2 { left: 860px; top: 760px; background: #34d399; } .p3 { right: 210px; top: 210px; background: #a78bfa; } .p4 { right: 520px; bottom: 176px; background: #facc15; }
+      .glitch-bar { position: absolute; left: 0; right: 0; height: 4px; top: 50%; opacity: 0; background: linear-gradient(90deg, transparent, #22d3ee, #facc15, transparent); filter: blur(1px); }
+      .scene { position: absolute; inset: 0; opacity: 0; }
+      #scene-1 { opacity: 1; }
+      .chapter { position: absolute; left: 90px; top: 44px; min-width: 260px; height: 48px; padding: 10px 18px; border-radius: 999px; border: 1px solid rgba(125,211,252,.50); color: #a5f3fc; background: rgba(8,47,73,.58); font-size: 23px; line-height: 28px; font-weight: 900; box-shadow: 0 0 32px rgba(34,211,238,.12); }
+      .layout { position: absolute; left: 90px; right: 90px; top: 112px; bottom: 156px; display: grid; grid-template-columns: 40% 60%; gap: 54px; }
+      .left { min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 24px; padding-right: 8px; }
+      .headline { margin: 0; max-width: 720px; color: #fff; font-size: 82px; line-height: 1.02; font-weight: 950; letter-spacing: 0; text-shadow: 0 8px 42px rgba(0,0,0,.78), 0 0 28px rgba(125,211,252,.22); }
+      .subtitle { margin: 0; max-width: 700px; color: #dbeafe; font-size: 36px; line-height: 1.25; font-weight: 850; text-shadow: 0 6px 28px rgba(0,0,0,.68); }
+      .steps { display: grid; gap: 15px; margin-top: 8px; }
+      .step { display: grid; grid-template-columns: 52px 1fr; gap: 16px; align-items: center; min-height: 70px; padding: 14px 18px; border-radius: 18px; border: 1px solid rgba(148,163,184,.24); background: rgba(15,23,42,.78); box-shadow: 0 16px 42px rgba(0,0,0,.24); }
+      .step-num { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 15px; background: #0f172a; color: #ffffff; border: 2px solid #facc15; font-size: 24px; font-weight: 950; }
+      .step-text { color: #f8fafc; font-size: 27px; line-height: 1.2; font-weight: 850; text-shadow: 0 2px 18px rgba(0,0,0,.50); }
+      .right { min-width: 0; display: flex; align-items: center; justify-content: center; }
+      .code-panel { width: 100%; max-width: 1040px; min-height: 650px; border-radius: 28px; border: 1px solid rgba(148,163,184,.30); background: rgba(3,7,18,.76); box-shadow: 0 34px 110px rgba(0,0,0,.50), inset 0 0 0 1px rgba(255,255,255,.05); overflow: hidden; }
+      .panel-topbar { height: 66px; display: flex; align-items: center; justify-content: space-between; padding: 0 26px; border-bottom: 1px solid rgba(148,163,184,.20); background: rgba(2,6,23,.78); }
+      .traffic { display: flex; gap: 10px; } .traffic span { width: 14px; height: 14px; border-radius: 999px; background: #ef4444; } .traffic span:nth-child(2) { background: #facc15; } .traffic span:nth-child(3) { background: #22c55e; }
+      .panel-label { color: #a5f3fc; font-size: 19px; font-weight: 900; }
+      .terminal { padding: 30px 34px 22px; height: 584px; overflow: hidden; }
+      .code-line { margin: 0 0 17px; color: #e0f2fe; font-family: Consolas, monospace; font-size: 27px; line-height: 1.34; font-weight: 780; text-shadow: 0 0 18px rgba(14,165,233,.18); white-space: pre; }
+      .code-line.dim { color: #c4b5fd; } .code-line.hot { color: #fde68a; }
+      .data-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 25px; }
+      .data-card { min-height: 110px; padding: 18px; border-radius: 18px; background: rgba(15,23,42,.84); border: 1px solid rgba(148,163,184,.22); }
+      .data-card b { display: block; color: #facc15; font-size: 34px; line-height: 1; margin-bottom: 10px; } .data-card span { color: #dbeafe; font-size: 20px; font-weight: 780; }
+      .caption-box { position: absolute; left: 260px; right: 260px; bottom: 24px; height: 120px; display: flex; align-items: center; justify-content: center; gap: 14px; border-radius: 26px; opacity: 0; color: #fff; background: rgba(2,6,23,.90); border: 1px solid rgba(125,211,252,.38); box-shadow: 0 24px 84px rgba(0,0,0,.54); }
+      #caption-1 { opacity: 1; }
+      .caption-normal, .caption-key { display: inline-block; font-size: 44px; line-height: 1.08; font-weight: 950; text-shadow: 0 4px 28px rgba(0,0,0,.72); }
+      .caption-key { color: #facc15; text-shadow: 0 0 28px rgba(250,204,21,.58), 0 4px 28px rgba(0,0,0,.72); }
     </style>
   </head>
   <body>
-    <div id="root" data-composition-id="video_idea_01" data-start="0" data-width="1080" data-height="1920" data-duration="60" data-fps="30">
-      <section id="bg" class="clip background-layer" data-start="0" data-duration="60" data-track-index="0">
-        <div id="grid" class="grid" data-layout-ignore="true"></div>
-        <div id="light-sweep" class="light-sweep" data-layout-ignore="true"></div>
-        <div id="particle-1" class="particle p1" data-layout-ignore="true"></div>
-        <div id="particle-2" class="particle p2" data-layout-ignore="true"></div>
-        <div id="particle-3" class="particle p3" data-layout-ignore="true"></div>
-      </section>
-
-      <section id="scene-hook" class="clip" data-start="0" data-duration="3" data-track-index="1">
-        <div class="scene-inner">
-          <div id="hook-eyebrow" class="eyebrow">前3秒强钩子</div>
-          <h1 id="hook-title" class="headline">
-            我把 <span class="highlight">AI自动生成视频</span><br />真的跑了一遍
-          </h1>
-          <p id="hook-caption" class="caption">结果不像工具，更像一条内容生产线。</p>
-        </div>
-      </section>
-
-      <section id="scene-problem" class="clip" data-start="3" data-duration="7" data-track-index="1">
-        <div class="scene-inner">
-          <div class="eyebrow">问题展示</div>
-          <h2 id="problem-title" class="headline">传统视频制作<br />慢、贵、步骤多</h2>
-          <p id="problem-caption" class="caption">脚本、画面、字幕、剪辑，每一步都在消耗创作者时间。</p>
-        </div>
-      </section>
-
-      <section id="scene-operation" class="clip" data-start="10" data-duration="15" data-track-index="1">
-        <div class="scene-inner">
-          <div class="eyebrow">AI操作演示</div>
-          <div id="phone-frame" class="phone-frame">
-            <div class="input-bar">
-              <span class="cursor-dot"></span>
-              输入需求：AI自动生成视频
-            </div>
-            <div class="process-list">
-              <div id="process-1" class="process-item">01 读取趋势</div>
-              <div id="process-2" class="process-item">02 拆解结构</div>
-              <div id="process-3" class="process-item">03 生成脚本</div>
-              <div id="process-4" class="process-item">04 输出视频包</div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="scene-result" class="clip" data-start="25" data-duration="20" data-track-index="1">
-        <div class="scene-inner">
-          <div class="eyebrow">结果对比</div>
-          <div id="result-panel" class="result-panel">
-            <div class="compare-grid">
-              <div id="old-flow" class="compare-card">
-                <h3>旧流程</h3>
-                <p>先找选题，再写脚本，再剪素材，再做字幕。</p>
-                <div class="metric">4步+</div>
-              </div>
-              <div id="ai-flow" class="compare-card">
-                <h3>AI流程</h3>
-                <p>输入趋势，自动结构化，直接生成可拍脚本。</p>
-                <div class="metric">1条线</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="scene-close" class="clip" data-start="45" data-duration="15" data-track-index="1">
-        <div class="scene-inner">
-          <div class="eyebrow">结尾引导</div>
-          <h2 id="close-title" class="headline">你今天就能<br />复制这套方法</h2>
-          <div id="workflow-panel" class="workflow-panel">
-            <div class="steps">
-              <div class="step-card">
-                <div class="step-number">1</div>
-                <p>先给 <strong>趋势</strong></p>
-              </div>
-              <div class="step-card">
-                <div class="step-number">2</div>
-                <p>让 AI 拆 <strong>结构</strong></p>
-              </div>
-              <div class="step-card">
-                <div class="step-number">3</div>
-                <p>生成 <strong>可拍脚本</strong></p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div id="caption-1" class="clip bottom-caption" data-start="0" data-duration="3" data-track-index="2">
-        AI自动生成视频
-      </div>
-      <div id="caption-2" class="clip bottom-caption" data-start="3" data-duration="7" data-track-index="2">
-        传统制作太慢
-      </div>
-      <div id="caption-3" class="clip bottom-caption" data-start="10" data-duration="15" data-track-index="2">
-        输入需求，AI开跑
-      </div>
-      <div id="caption-4" class="clip bottom-caption" data-start="25" data-duration="20" data-track-index="2">
-        复杂制作变可见结果
-      </div>
-      <div id="caption-5" class="clip bottom-caption" data-start="45" data-duration="15" data-track-index="2">
-        给趋势，拆结构，出脚本
-      </div>
+    <div id="root" data-composition-id="video_idea_01" data-start="0" data-width="1920" data-height="1080" data-duration="60" data-fps="30">
+      <section id="bg" class="clip background-layer" data-start="0" data-duration="60" data-track-index="0"><div class="bg-dim"></div><div id="grid" class="grid" data-layout-ignore="true"></div><div id="light-sweep" class="light-sweep" data-layout-ignore="true"></div><div id="particle-1" class="particle p1" data-layout-ignore="true"></div><div id="particle-2" class="particle p2" data-layout-ignore="true"></div><div id="particle-3" class="particle p3" data-layout-ignore="true"></div><div id="particle-4" class="particle p4" data-layout-ignore="true"></div><div id="glitch-bar" class="glitch-bar" data-layout-ignore="true"></div></section>
+      <section id="scene-1" class="clip scene" data-start="0" data-duration="3" data-track-index="1"><div id="chapter-1" class="chapter"></div><div class="layout"><div class="left"><h1 id="title-1" class="headline"></h1><p id="sub-1" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-1-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-1-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-1-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-1" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-1" class="panel-label"></div></div><div class="terminal"><p id="code-1-1" class="code-line hot"></p><p id="code-1-2" class="code-line"></p><p id="code-1-3" class="code-line dim"></p><p id="code-1-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-1-1"></b><span id="metric-1-1-label"></span></div><div class="data-card"><b id="metric-1-2"></b><span id="metric-1-2-label"></span></div><div class="data-card"><b id="metric-1-3"></b><span id="metric-1-3-label"></span></div></div></div></div></div></div></section>
+      <section id="scene-2" class="clip scene" data-start="3" data-duration="7" data-track-index="1"><div id="chapter-2" class="chapter"></div><div class="layout"><div class="left"><h2 id="title-2" class="headline"></h2><p id="sub-2" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-2-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-2-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-2-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-2" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-2" class="panel-label"></div></div><div class="terminal"><p id="code-2-1" class="code-line hot"></p><p id="code-2-2" class="code-line"></p><p id="code-2-3" class="code-line dim"></p><p id="code-2-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-2-1"></b><span id="metric-2-1-label"></span></div><div class="data-card"><b id="metric-2-2"></b><span id="metric-2-2-label"></span></div><div class="data-card"><b id="metric-2-3"></b><span id="metric-2-3-label"></span></div></div></div></div></div></div></section>
+      <section id="scene-3" class="clip scene" data-start="10" data-duration="10" data-track-index="1"><div id="chapter-3" class="chapter"></div><div class="layout"><div class="left"><h2 id="title-3" class="headline"></h2><p id="sub-3" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-3-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-3-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-3-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-3" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-3" class="panel-label"></div></div><div class="terminal"><p id="code-3-1" class="code-line hot"></p><p id="code-3-2" class="code-line"></p><p id="code-3-3" class="code-line dim"></p><p id="code-3-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-3-1"></b><span id="metric-3-1-label"></span></div><div class="data-card"><b id="metric-3-2"></b><span id="metric-3-2-label"></span></div><div class="data-card"><b id="metric-3-3"></b><span id="metric-3-3-label"></span></div></div></div></div></div></div></section>
+      <section id="scene-4" class="clip scene" data-start="20" data-duration="10" data-track-index="1"><div id="chapter-4" class="chapter"></div><div class="layout"><div class="left"><h2 id="title-4" class="headline"></h2><p id="sub-4" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-4-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-4-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-4-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-4" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-4" class="panel-label"></div></div><div class="terminal"><p id="code-4-1" class="code-line hot"></p><p id="code-4-2" class="code-line"></p><p id="code-4-3" class="code-line dim"></p><p id="code-4-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-4-1"></b><span id="metric-4-1-label"></span></div><div class="data-card"><b id="metric-4-2"></b><span id="metric-4-2-label"></span></div><div class="data-card"><b id="metric-4-3"></b><span id="metric-4-3-label"></span></div></div></div></div></div></div></section>
+      <section id="scene-5" class="clip scene" data-start="30" data-duration="15" data-track-index="1"><div id="chapter-5" class="chapter"></div><div class="layout"><div class="left"><h2 id="title-5" class="headline"></h2><p id="sub-5" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-5-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-5-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-5-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-5" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-5" class="panel-label"></div></div><div class="terminal"><p id="code-5-1" class="code-line hot"></p><p id="code-5-2" class="code-line"></p><p id="code-5-3" class="code-line dim"></p><p id="code-5-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-5-1"></b><span id="metric-5-1-label"></span></div><div class="data-card"><b id="metric-5-2"></b><span id="metric-5-2-label"></span></div><div class="data-card"><b id="metric-5-3"></b><span id="metric-5-3-label"></span></div></div></div></div></div></div></section>
+      <section id="scene-6" class="clip scene" data-start="45" data-duration="15" data-track-index="1"><div id="chapter-6" class="chapter"></div><div class="layout"><div class="left"><h2 id="title-6" class="headline"></h2><p id="sub-6" class="subtitle"></p><div class="steps"><div class="step"><div class="step-num">1</div><div id="step-6-1" class="step-text"></div></div><div class="step"><div class="step-num">2</div><div id="step-6-2" class="step-text"></div></div><div class="step"><div class="step-num">3</div><div id="step-6-3" class="step-text"></div></div></div></div><div class="right"><div id="panel-6" class="code-panel"><div class="panel-topbar"><div class="traffic"><span></span><span></span><span></span></div><div id="label-6" class="panel-label"></div></div><div class="terminal"><p id="code-6-1" class="code-line hot"></p><p id="code-6-2" class="code-line"></p><p id="code-6-3" class="code-line dim"></p><p id="code-6-4" class="code-line"></p><div class="data-row"><div class="data-card"><b id="metric-6-1"></b><span id="metric-6-1-label"></span></div><div class="data-card"><b id="metric-6-2"></b><span id="metric-6-2-label"></span></div><div class="data-card"><b id="metric-6-3"></b><span id="metric-6-3-label"></span></div></div></div></div></div></div></section>
+      <div id="caption-1" class="clip caption-box" data-start="0" data-duration="3" data-track-index="2"><span id="caption-1-normal" class="caption-normal"></span><span id="caption-1-key" class="caption-key"></span></div>
+      <div id="caption-2" class="clip caption-box" data-start="3" data-duration="7" data-track-index="2"><span id="caption-2-normal" class="caption-normal"></span><span id="caption-2-key" class="caption-key"></span></div>
+      <div id="caption-3" class="clip caption-box" data-start="10" data-duration="10" data-track-index="2"><span id="caption-3-normal" class="caption-normal"></span><span id="caption-3-key" class="caption-key"></span></div>
+      <div id="caption-4" class="clip caption-box" data-start="20" data-duration="10" data-track-index="2"><span id="caption-4-normal" class="caption-normal"></span><span id="caption-4-key" class="caption-key"></span></div>
+      <div id="caption-5" class="clip caption-box" data-start="30" data-duration="15" data-track-index="2"><span id="caption-5-normal" class="caption-normal"></span><span id="caption-5-key" class="caption-key"></span></div>
+      <div id="caption-6" class="clip caption-box" data-start="45" data-duration="15" data-track-index="2"><span id="caption-6-normal" class="caption-normal"></span><span id="caption-6-key" class="caption-key"></span></div>
     </div>
-
     <script>
+      const scenes = [
+        {ch:"\u5f00\u573a\uff1a\u81ea\u52a8\u751f\u6210\u89c6\u9891", t:"\u4e0d\u7528\u526a\u8f91\uff0c\u4e00\u5957\u6d41\u7a0b\u81ea\u52a8\u751f\u6210\u89c6\u9891", sub:"\u8d8b\u52bf \u2192 \u811a\u672c \u2192 \u89c6\u9891\u5de5\u7a0b \u2192 MP4", s:["\u8d8b\u52bf\u8fdb\u6765", "AI\u62c6\u7ed3\u6784", "\u76f4\u51faMP4"], l:"PUBLISH PIPELINE", c:["goal = \"trend to mp4\"", "input = raw_trends", "output = hyperframes_project", "status = publish_ready"], m:[["0-3s","\u5f3a\u94a9\u5b50"],["16:9","\u6a2a\u5c4f"],["MP4","\u53ef\u53d1\u5e03"]]},
+        {ch:"\u75db\u70b9\uff1a\u505a\u89c6\u9891\u592a\u6162", t:"\u505a\u4e00\u6761\u89c6\u9891\uff0c\u6162\u5728\u6d41\u7a0b", sub:"\u9009\u9898\u3001\u811a\u672c\u3001\u5b57\u5e55\u3001\u526a\u8f91\uff0c\u6bcf\u6b65\u90fd\u5728\u91cd\u590d\u6c9f\u901a\u3002", s:["\u5148\u627e\u70ed\u70b9", "\u518d\u5199\u811a\u672c", "\u6700\u540e\u624b\u526a"], l:"OLD WORKFLOW", c:["topic = search_manually()", "script = rewrite_from_zero()", "edit = assemble_by_hand()", "lost_time = every_step"], m:[["4\u6b65","\u624b\u5de5\u6d41\u7a0b"],["60m+","\u53cd\u590d\u8c03\u6574"],["low","\u590d\u7528\u7387"]]},
+        {ch:"\u7b2c\u4e00\u6b65\uff1a\u8f93\u5165\u8d8b\u52bf", t:"\u5148\u628a\u8d8b\u52bf\u4e22\u7ed9\u7cfb\u7edf", sub:"\u4eba\u7c7b\u53ea\u8d1f\u8d23\u5224\u65ad\u65b9\u5411\uff0c\u7cfb\u7edf\u8d1f\u8d23\u7ed3\u6784\u5316\u3002", s:["\u8f93\u5165\u8d8b\u52bf", "\u81ea\u52a8\u5206\u7c7b", "\u8ba1\u7b97\u70ed\u5ea6"], l:"TREND INJECTION", c:["raw = [\"AI\u81ea\u52a8\u751f\u6210\u89c6\u9891\"]", "trend.title = normalize(raw)", "trend.category = \"workflow\"", "viral_score = 8.6"], m:[["8.6","\u70ed\u5ea6\u5206"],["AI","\u7c7b\u522b"],["Top","\u4f18\u5148\u7ea7"]]},
+        {ch:"\u7b2c\u4e8c\u6b65\uff1aAI\u62c6\u7ed3\u6784", t:"AI\u5148\u62c6\u51fa\u7206\u6b3e\u9aa8\u67b6", sub:"\u94a9\u5b50\u3001\u8282\u594f\u3001\u89c6\u89c9\u3001\u5b57\u5e55\uff0c\u5148\u53d8\u6210\u53ef\u6267\u884c\u7ed3\u6784\u3002", s:["\u524d3\u79d2\u94a9\u5b50", "3-5\u79d2\u4e00\u53d8\u5316", "\u5b57\u5e55\u5361\u8282\u594f"], l:"STRUCTURE AGENT", c:["hook = create_hook(trend)", "flow = split_beats(60)", "visual = map_code_panel(flow)", "caption = short_lines(flow)"], m:[["Hook","\u5f00\u573a"],["Flow","\u8282\u594f"],["Subs","\u5b57\u5e55"]]},
+        {ch:"\u7b2c\u4e09\u6b65\uff1a\u811a\u672c\u548c\u89c6\u9891\u5305", t:"\u811a\u672c\u548c\u89c6\u9891\u5305\u4e00\u6b21\u751f\u6210", sub:"\u4e0d\u53ea\u662f\u5199\u6587\u6848\uff0c\u800c\u662f\u76f4\u63a5\u4ea4\u7ed9\u89c6\u9891\u5de5\u7a0b\u4f7f\u7528\u3002", s:["\u751f\u6210\u53e3\u64ad", "\u62c6\u5206\u5206\u955c", "\u8f93\u51fa\u63d0\u793a\u8bcd"], l:"CREATOR PACKAGE", c:["script = write_voiceover()", "storyboard = make_timeline()", "style = define_visual_rules()", "prompt = hyperframes_ready()"], m:[["script","\u53e3\u64ad"],["board","\u5206\u955c"],["prompt","\u5de5\u7a0b"]]},
+        {ch:"\u7b2c\u4e94\u6b65\uff1a\u6e32\u67d3MP4", t:"\u6700\u540e\u4e00\u952e\u6e32\u67d3\u6210MP4", sub:"\u8fd9\u5c31\u662f\u7b2c\u4e00\u6761AI\u535a\u4e3b\u6837\u7247\u7684\u751f\u4ea7\u7ebf\u3002", s:["\u6253\u5f00\u5de5\u7a0b", "\u9884\u89c8\u8c03\u6574", "\u6e32\u67d3\u53d1\u5e03"], l:"HYPERFRAMES RENDER", c:["npx hyperframes lint", "npx hyperframes validate", "npx hyperframes render --quality high", "output = video_idea_01_publish_v1.mp4"], m:[["60s","\u6210\u7247"],["1080p","\u6a2a\u5c4f"],["ready","\u53d1\u5e03"]]}
+      ];
+      const captions = [["\u4e0d\u7528\u526a\u8f91", "\u81ea\u52a8\u751f\u6210"], ["\u505a\u89c6\u9891\u6162", "\u6162\u5728\u6d41\u7a0b"], ["\u5148\u8f93\u5165\u8d8b\u52bf", "AI\u5224\u65ad"], ["\u5148\u62c6\u7ed3\u6784", "\u518d\u5199\u811a\u672c"], ["\u811a\u672c\u548c\u89c6\u9891\u5305", "\u4e00\u6b21\u751f\u6210"], ["\u6700\u540e\u6e32\u67d3", "\u76f4\u51faMP4"]];
+      function setText(id, value) { const el = document.getElementById(id); if (el) el.textContent = value; }
+      scenes.forEach((scene, idx) => { const n = idx + 1; setText(`chapter-${n}`, scene.ch); setText(`title-${n}`, scene.t); setText(`sub-${n}`, scene.sub); setText(`label-${n}`, scene.l); scene.s.forEach((txt, i) => setText(`step-${n}-${i + 1}`, txt)); scene.c.forEach((txt, i) => setText(`code-${n}-${i + 1}`, txt)); scene.m.forEach((metric, i) => { setText(`metric-${n}-${i + 1}`, metric[0]); setText(`metric-${n}-${i + 1}-label`, metric[1]); }); setText(`caption-${n}-normal`, captions[idx][0]); setText(`caption-${n}-key`, captions[idx][1]); });
+      function showElement(selector, visible) {
+        document.querySelectorAll(selector).forEach((el) => {
+          el.style.opacity = visible ? "1" : "0";
+          el.style.transform = "translate(0px, 0px) scale(1)";
+        });
+      }
+      function setTransform(selector, x, y, scale) {
+        document.querySelectorAll(selector).forEach((el) => {
+          el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        });
+      }
       function createMiniTimeline() {
-        const tweens = [];
-        const numericProps = new Set(["opacity", "x", "y", "scale"]);
-
-        function elements(selector) {
-          if (typeof selector !== "string") return [];
-          return Array.from(document.querySelectorAll(selector));
+        const segments = [
+          { n: 1, start: 0, end: 3 },
+          { n: 2, start: 3, end: 10 },
+          { n: 3, start: 10, end: 20 },
+          { n: 4, start: 20, end: 30 },
+          { n: 5, start: 30, end: 45 },
+          { n: 6, start: 45, end: 60.01 }
+        ];
+        function activeNumber(sec) {
+          const found = segments.find((seg) => sec >= seg.start && sec < seg.end);
+          return found ? found.n : 6;
         }
-
-        function pickVars(vars) {
-          const picked = {};
-          Object.keys(vars || {}).forEach((key) => {
-            if (numericProps.has(key)) picked[key] = Number(vars[key]);
-          });
-          return picked;
-        }
-
-        function defaultsFor(vars) {
-          const defaults = {};
-          Object.keys(vars || {}).forEach((key) => {
-            if (key === "opacity") defaults.opacity = 1;
-            if (key === "x") defaults.x = 0;
-            if (key === "y") defaults.y = 0;
-            if (key === "scale") defaults.scale = 1;
-          });
-          return defaults;
-        }
-
-        function applyVars(el, vars) {
-          const x = vars.x ?? 0;
-          const y = vars.y ?? 0;
-          const scale = vars.scale ?? 1;
-          if (vars.opacity !== undefined) el.style.opacity = String(vars.opacity);
-          if (vars.x !== undefined || vars.y !== undefined || vars.scale !== undefined) {
-            el.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+        function applyScene(sec) {
+          const current = activeNumber(sec);
+          for (let n = 1; n <= 6; n += 1) {
+            const active = n === current;
+            showElement(`#scene-${n}`, active);
+            showElement(`#caption-${n}`, active);
+            if (active) {
+              showElement(`#title-${n}`, true);
+              showElement(`#sub-${n}`, true);
+              showElement(`#panel-${n}`, true);
+              showElement(`#chapter-${n}`, true);
+              showElement(`#step-${n}-1`, true);
+              showElement(`#step-${n}-2`, true);
+              showElement(`#step-${n}-3`, true);
+              showElement(`#code-${n}-1`, true);
+              showElement(`#code-${n}-2`, true);
+              showElement(`#code-${n}-3`, true);
+              showElement(`#code-${n}-4`, true);
+              const seg = segments[n - 1];
+              const local = Math.max(0, sec - seg.start);
+              const pulse = local > 1 && local < 1.35 ? 1.1 : 1;
+              setTransform(`#caption-${n}-key`, 0, 0, pulse);
+              setTransform(`#panel-${n}`, 0, 0, local > 4 && local < 4.5 ? 1.018 : 1);
+            }
           }
+          const sweepX = (sec % 18) / 18 * 2440;
+          setTransform("#light-sweep", sweepX, 0, 1);
+          setTransform("#grid", 0, Math.min(64, sec), 1);
+          setTransform("#particle-1", 72 * (sec / 60), -52 * (sec / 60), 1);
+          setTransform("#particle-2", -68 * (sec / 60), 64 * (sec / 60), 1);
+          setTransform("#particle-3", -42 * (sec / 60), -72 * (sec / 60), 1);
+          setTransform("#particle-4", 54 * (sec / 60), 58 * (sec / 60), 1);
+          const glitchOn = segments.some((seg) => sec > seg.start + 0.08 && sec < seg.start + 0.18 && seg.start > 0);
+          document.getElementById("glitch-bar").style.opacity = glitchOn ? "0.55" : "0.001";
         }
-
-        function interpolate(from, to, progress) {
-          const out = {};
-          const keys = new Set([...Object.keys(from), ...Object.keys(to)]);
-          keys.forEach((key) => {
-            const a = from[key] ?? (key === "opacity" || key === "scale" ? 1 : 0);
-            const b = to[key] ?? (key === "opacity" || key === "scale" ? 1 : 0);
-            out[key] = a + (b - a) * progress;
-          });
-          return out;
-        }
-
         const api = {
-          from(selector, vars, at = 0) {
-            const fromVars = pickVars(vars);
-            tweens.push({ selector, start: Number(at), duration: Number(vars.duration || 0), fromVars, toVars: defaultsFor(fromVars) });
-            return api;
-          },
-          to(selector, vars, at = 0) {
-            const toVars = pickVars(vars);
-            tweens.push({ selector, start: Number(at), duration: Number(vars.duration || 0), fromVars: defaultsFor(toVars), toVars });
-            return api;
-          },
-          fromTo(selector, fromVars, toVars, at = 0) {
-            tweens.push({ selector, start: Number(at), duration: Number(toVars.duration || 0), fromVars: pickVars(fromVars), toVars: pickVars(toVars) });
-            return api;
-          },
-          set(selector, vars) {
-            elements(selector).forEach((el) => applyVars(el, pickVars(vars)));
-            return api;
-          },
-          seek(sec = 0) {
-            const time = Number(sec) || 0;
-            tweens.forEach((tween) => {
-              const duration = Math.max(tween.duration, 0.001);
-              const progress = Math.min(1, Math.max(0, (time - tween.start) / duration));
-              const vars = interpolate(tween.fromVars, tween.toVars, progress);
-              elements(tween.selector).forEach((el) => applyVars(el, vars));
-            });
-            return api;
-          },
-          time(sec) {
-            if (sec === undefined) return 0;
-            return api.seek(sec);
-          },
-          pause() {
-            return api;
-          },
-          duration() {
-            return 60;
-          },
-          progress(value) {
-            if (value === undefined) return 0;
-            return api.seek(Number(value) * 60);
-          },
+          from() { return api; },
+          to() { return api; },
+          fromTo() { return api; },
+          seek(sec = 0) { applyScene(Number(sec) || 0); return api; },
+          time(sec) { return sec === undefined ? 0 : api.seek(sec); },
+          totalTime(sec) { return sec === undefined ? 0 : api.seek(sec); },
+          pause() { return api; },
+          duration() { return 60; },
+          totalDuration() { return 60; },
+          getChildren() { return []; },
+          timeScale(value) { return value === undefined ? 1 : api; },
+          progress(value) { return value === undefined ? 0 : api.seek(Number(value) * 60); },
+          totalProgress(value) { return value === undefined ? 0 : api.seek(Number(value) * 60); }
         };
-
+        applyScene(0);
         return api;
       }
-
-      window.gsap = {
-        timeline() {
-          return createMiniTimeline();
-        },
-      };
+      window.gsap = { timeline() { return createMiniTimeline(); } };
       window.__timelines = window.__timelines || {};
       const tl = gsap.timeline({ paused: true });
-
-      tl.from("#hook-eyebrow", { y: -28, opacity: 0, duration: 0.35, ease: "power3.out" }, 0.1)
-        .from("#hook-title", { scale: 0.86, opacity: 0, duration: 0.55, ease: "back.out(1.7)" }, 0.18)
-        .from("#hook-caption", { x: -40, opacity: 0, duration: 0.45, ease: "power3.out" }, 0.65)
-        .fromTo("#caption-1", { y: 68, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.28, ease: "back.out(2)" }, 0.2)
-        .to("#caption-1", { scale: 1.05, duration: 0.12, yoyo: true, repeat: 3, ease: "power1.inOut" }, 1.1);
-
-      tl.from("#problem-title", { x: -90, opacity: 0, duration: 0.46, ease: "power3.out" }, 3.2)
-        .from("#problem-caption", { y: 36, opacity: 0, duration: 0.42, ease: "power2.out" }, 3.78)
-        .fromTo("#caption-2", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 3.12)
-        .to("#problem-title", { x: 10, duration: 0.08, yoyo: true, repeat: 5, ease: "power1.inOut" }, 4.2);
-
-      tl.from("#phone-frame", { y: 120, opacity: 0, scale: 0.92, duration: 0.5, ease: "power3.out" }, 10.15)
-        .from("#process-1", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 11.0)
-        .from("#process-2", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 13.0)
-        .from("#process-3", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 15.0)
-        .from("#process-4", { x: -56, opacity: 0, duration: 0.3, ease: "power2.out" }, 17.0)
-        .fromTo("#caption-3", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 10.1)
-        .to("#process-4", { scale: 1.05, duration: 0.18, yoyo: true, repeat: 2, ease: "power1.inOut" }, 19.5);
-
-      tl.from("#result-panel", { scale: 0.9, opacity: 0, duration: 0.48, ease: "power3.out" }, 25.15)
-        .from("#old-flow", { x: -70, opacity: 0, duration: 0.34, ease: "power2.out" }, 26.0)
-        .from("#ai-flow", { x: 70, opacity: 0, duration: 0.34, ease: "power2.out" }, 27.0)
-        .fromTo("#caption-4", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 25.1)
-        .to("#ai-flow", { y: -12, scale: 1.03, duration: 0.36, yoyo: true, repeat: 2, ease: "power1.inOut" }, 31.0);
-
-      tl.from("#close-title", { y: 70, opacity: 0, duration: 0.48, ease: "power3.out" }, 45.15)
-        .from("#workflow-panel", { y: 90, opacity: 0, duration: 0.5, ease: "power3.out" }, 46.2)
-        .from(".step-card", { x: -52, opacity: 0, duration: 0.28, stagger: 0.25, ease: "power2.out" }, 47.0)
-        .fromTo("#caption-5", { y: 64, opacity: 0 }, { y: 0, opacity: 1, duration: 0.28, ease: "power2.out" }, 45.1)
-        .to(".step-number", { scale: 1.08, duration: 0.16, stagger: 0.2, yoyo: true, repeat: 1, ease: "power1.inOut" }, 51.0);
-
-      tl.to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 0.2)
-        .to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 12)
-        .to("#light-sweep", { x: 1680, duration: 6, ease: "power1.inOut" }, 27)
-        .to("#grid", { y: 80, duration: 60, ease: "none" }, 0)
-        .to("#particle-1", { y: -70, x: 42, duration: 18, ease: "sine.inOut" }, 0)
-        .to("#particle-2", { y: 80, x: -38, duration: 22, ease: "sine.inOut" }, 0)
-        .to("#particle-3", { y: -92, x: 60, duration: 20, ease: "sine.inOut" }, 0);
-
       window.__timelines["video_idea_01"] = tl;
     </script>
   </body>
 </html>
-
-
-
 
 

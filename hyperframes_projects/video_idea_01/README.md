@@ -1,59 +1,45 @@
-# AI自动生成视频 HyperFrames Project
+﻿# AI Workflow Teaching Video - Publish V1
 
-这是基于 `outputs/video_packages/video_idea_01/` 生成的第一条 HyperFrames 竖屏短视频工程。
+This project is a 1920x1080 horizontal AI teaching sample for an AI creator workflow.
 
 ## Composition
 
-- 文件：`index.html`
-- Composition ID：`video_idea_01`
-- 分辨率：`1080x1920`
-- 比例：`9:16`
-- 时长：`60s`
-- FPS：`30`
-- 风格：AI知识博主、科技感、快节奏、大字动态字幕
+- File: `index.html`
+- Composition ID: `video_idea_01`
+- Resolution: `1920x1080`
+- Duration: `60s`
+- Format: 16:9 horizontal
+- Output target: `renders/video_idea_01_16x9_publish_v1.mp4`
 
-## 内容结构
+## Story Timeline
 
-- `0-3秒`：开头钩子
-- `3-10秒`：问题展示
-- `10-25秒`：AI操作演示
-- `25-45秒`：结果对比
-- `45-60秒`：结尾引导
+- `0-3s`: Strong hook
+- `3-10s`: Pain point, video production is too slow
+- `10-20s`: Input trend
+- `20-30s`: AI structures the content
+- `30-45s`: Generate script and video package
+- `45-60s`: Render MP4 and invite reuse
 
-## Preview
+## Layout
 
-```bash
-cd hyperframes_projects/video_idea_01
-npx hyperframes preview --port 3017
-```
+- Top: chapter title only
+- Left 40%: bright main title and three clear steps
+- Right 60%: readable AI workflow code/data panel
+- Bottom: fixed 120px voiceover subtitle bar
 
-打开 Studio：
+## Audio
 
-```text
-http://localhost:3017/#project/video_idea_01
-```
-
-## Render
-
-预览确认后再渲染：
-
-```bash
-cd hyperframes_projects/video_idea_01
-npx hyperframes render --quality high --output renders/video_idea_01.mp4
-```
-
-快速草稿：
-
-```bash
-cd hyperframes_projects/video_idea_01
-npx hyperframes render --quality draft --output renders/video_idea_01_draft.mp4
-```
+This version does not synthesize final voiceover audio yet. See `AUDIO_PLAN.md` for voiceover script, BGM direction, SFX timing, and replacement workflow.
 
 ## Validate
 
 ```bash
-cd hyperframes_projects/video_idea_01
 npx hyperframes lint
 npx hyperframes validate
-npx hyperframes inspect
+```
+
+## Render
+
+```bash
+npx hyperframes render --quality high --output renders/video_idea_01_16x9_publish_v1.mp4
 ```

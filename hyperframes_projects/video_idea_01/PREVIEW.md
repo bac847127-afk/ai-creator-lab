@@ -1,16 +1,16 @@
-# Preview 使用说明
+﻿# Preview Guide
 
-在项目根目录运行：
+Run from the repository root:
 
 ```bash
 cd hyperframes_projects/video_idea_01
 npx hyperframes preview --port 3017
 ```
 
-预览地址：
+Studio URL:
 
 ```text
 http://localhost:3017/#project/video_idea_01
 ```
 
-Studio 是可编辑时间线界面，可以检查镜头节奏、字幕位置、转场和整体视觉风格。
+The preview opens HyperFrames Studio for checking the 1920x1080 horizontal layout, subtitle placement, scene rhythm, panel animation, and AI workflow teaching style.

@@ -1,19 +1,36 @@
-# Render 使用说明
+﻿# Render Guide
 
-先完成 preview 检查，再渲染最终视频。
+This project currently renders a clean silent MP4 from HyperFrames. Final publishing audio should be added in a post-processing pass after voiceover and BGM are ready.
 
-## 草稿渲染
-
-```bash
-cd hyperframes_projects/video_idea_01
-npx hyperframes render --quality draft --output renders/video_idea_01_draft.mp4
-```
-
-## 最终渲染
+## Silent publish render
 
 ```bash
 cd hyperframes_projects/video_idea_01
-npx hyperframes render --quality high --output renders/video_idea_01.mp4
+npx hyperframes render --quality high --output renders/video_idea_01_16x9_publish_v2.mp4
 ```
 
-渲染完成后检查 `renders/video_idea_01.mp4` 是否存在且文件大小正常。
+## Audio merge plan
+
+Expected files:
+
+- `audio/voiceover.wav`: final 60s narration
+- `audio/bgm.mp3`: low-volume tech BGM
+
+Merge voiceover and BGM into the silent render:
+
+```bash
+ffmpeg -y \
+  -i renders/video_idea_01_16x9_publish_v2.mp4 \
+  -i audio/voiceover.wav \
+  -i audio/bgm.mp3 \
+  -filter_complex "[2:a]volume=0.18[bgm];[1:a][bgm]amix=inputs=2:duration=first:dropout_transition=0[a]" \
+  -map 0:v -map "[a]" \
+  -c:v copy -c:a aac -shortest \
+  renders/final_with_audio.mp4
+```
+
+## Validate after audio merge
+
+```bash
+ffprobe -v error -show_entries format=duration,size -of default=noprint_wrappers=1 renders/final_with_audio.mp4
+```
