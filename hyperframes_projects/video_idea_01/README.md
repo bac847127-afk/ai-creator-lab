@@ -43,3 +43,15 @@ npx hyperframes validate
 ```bash
 npx hyperframes render --quality high --output renders/video_idea_01_16x9_publish_v1.mp4
 ```
+
+## Publish Package
+
+The publishing package for this video is located at:
+
+- `publish_package/`
+
+It includes platform titles, descriptions, cover prompts, publishing notes, and the template reuse guide.
+
+Final publish-ready video:
+
+- `renders/video_idea_01_16x9_final_normalized.mp4`
