@@ -1,2 +1,19 @@
 ﻿__pycache__/
 *.py[cod]
+.gitignore：
+# video assets
+**/assets/raw/
+**/assets/processed/
+**/renders/
+**/*.mp4
+**/*.mov
+**/*.wav
+
+# temp
+C:/tmp/
+*.png
+*.jpg
+
+# node/cache
+node_modules/
+.cache/
